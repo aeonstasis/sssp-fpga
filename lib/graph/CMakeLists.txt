@@ -8,10 +8,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 ## Sources and headers
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp )
 set(LIB_NAME graph)
+include_directories(include)
+file(GLOB SOURCES src/*.cpp)
 
 ## Generate executable
 add_library(${LIB_NAME} SHARED ${SOURCES})
+target_include_directories(${LIB_NAME} INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)

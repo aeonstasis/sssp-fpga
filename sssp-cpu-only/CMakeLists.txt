@@ -11,8 +11,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Threads REQUIRED)
 
 ## Sources and headers
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp )
+include_directories(include)
+file(GLOB SOURCES src/*.cpp)
 set(MAIN_EXE_NAME sssp_cpu_only)
 
 ## Generate executable
