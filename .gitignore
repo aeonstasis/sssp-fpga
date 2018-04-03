@@ -2,6 +2,9 @@
 build
 third-party
 
+# Editor artifacts
+.clang_complete
+
 # CMake artifacts
 CMakeCache.txt
 CMakeFiles

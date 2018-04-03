@@ -12,8 +12,6 @@ if (NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-set(BINARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
 # Subdirectories
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/graph lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cpu-only bin)
