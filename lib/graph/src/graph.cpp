@@ -1,4 +1,6 @@
 #include "graph.hpp"
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <stdio.h>
@@ -6,8 +8,7 @@
 Edge::Edge(size_t src, size_t dest, int cost)
     : src(src), dest(dest), cost(cost) {}
 
-Graph::Graph(size_t num_vertices)
-    : num_vertices(num_vertices), edges(0) {}
+Graph::Graph(size_t num_vertices) : num_vertices(num_vertices), edges(0) {}
 
 void Graph::addEdge(size_t src, size_t dest, int cost) {
   Edge edge(src, dest, cost);

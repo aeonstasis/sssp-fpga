@@ -18,4 +18,5 @@ target_include_directories(${LIB_NAME} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(${LIB_NAME} Boost::serialization)
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
