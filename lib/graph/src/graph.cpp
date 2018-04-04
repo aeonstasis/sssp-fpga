@@ -1,9 +1,13 @@
 #include "graph.hpp"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
+#include <algorithm>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <stdio.h>
 
 using std::string;
@@ -11,25 +15,43 @@ using std::vector;
 
 namespace graph {
 
+void checkBounds(const vector<size_t> &input, size_t max) {
+  if (std::any_of(input.begin(), input.end(),
+                  [max](const auto &val) { return val >= max; })) {
+    throw std::invalid_argument("Specified index out of range");
+  }
+}
+
 Graph::Graph(size_t num_vertices)
     : num_vertices(num_vertices), adjacency_list(num_vertices) {}
 
 void Graph::addEdge(size_t src, size_t dest, size_t cost) {
+  checkBounds({src, dest}, num_vertices);
   adjacency_list[src].push_back({src, dest, cost});
   adjacency_list[dest].push_back({dest, src, cost});
 }
 
 vector<size_t> Graph::getNeighbors(size_t src) const {
-  auto num_neighbors = adjacency_list[src].size();
-  std::vector<size_t> res(num_neighbors);
-  for (size_t i = 0; i < num_neighbors; i++) {
-    res[i] = adjacency_list[src][i].dest;
+  checkBounds({src}, num_vertices);
+  auto neighbors = vector<size_t>{};
+  for (const auto &edge : adjacency_list.at(src)) {
+    if (edge.src == src) {
+      neighbors.push_back(edge.dest);
+    }
   }
-  return res;
+  return neighbors;
 }
 
 size_t Graph::cost(size_t src, size_t dest) const {
-  return adjacency_list.at(src).at(dest).cost;
+  checkBounds({src, dest}, num_vertices);
+  const auto &vertex_list = adjacency_list.at(src);
+  auto edge =
+      std::find_if(vertex_list.begin(), vertex_list.end(),
+                   [dest](const auto &edge) { return edge.dest == dest; });
+  if (edge == vertex_list.end()) {
+    throw std::invalid_argument("Specified edge doesn't exist");
+  }
+  return (*edge).cost;
 }
 
 string Graph::toString() const {
@@ -43,6 +65,18 @@ string Graph::toString() const {
     }
   }
   return str;
+}
+
+void Graph::save(const std::string &output_path) const {
+  auto out_stream = std::ofstream{output_path};
+  boost::archive::text_oarchive oa{out_stream};
+  oa << *this;
+}
+
+void Graph::load(const std::string &input_path) {
+  auto in_stream = std::ifstream{input_path};
+  boost::archive::text_iarchive ia{in_stream};
+  ia >> *this;
 }
 
 Graph Graph::generateGraph(size_t num_vertices, size_t num_edges, int seed) {
@@ -76,3 +110,17 @@ Graph Graph::generateGraph(size_t num_vertices, size_t num_edges, int seed) {
 }
 
 } /* namespace graph */
+
+namespace boost {
+namespace serialization {
+template <class Archive>
+void serialize(Archive &ar, graph::Edge &edge, const unsigned int) {
+  ar &edge.src &edge.dest &edge.cost;
+}
+
+template <class Archive>
+void serialize(Archive &ar, graph::Graph &graph, const unsigned int) {
+  ar &graph.num_vertices &graph.adjacency_list;
+}
+} /* namespace serialization */
+} /* namespace boost */

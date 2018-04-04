@@ -36,20 +36,13 @@ public:
 
 class GraphPriorityQueue {
 public:
-  struct Node {
-    size_t id;
-    double *priority;
-    Node(size_t id, double &priority) : id(id), priority(&priority) {}
-    bool operator<(const Node &rhs) const { return *priority < *rhs.priority; }
-  };
-
   GraphPriorityQueue(size_t num_vertices)
       : priorities_(num_vertices), queue_() {}
   inline void add(size_t id, double priority) {
     priorities_[id] = priority;
     queue_.push({id, priorities_.at(id)});
   }
-  inline bool empty() { return queue_.empty(); }
+  inline bool empty() const { return queue_.empty(); }
   inline size_t remove_min() {
     auto node = queue_.top();
     queue_.pop();
@@ -60,6 +53,13 @@ public:
   }
 
 private:
+  struct Node {
+    size_t id;
+    double *priority;
+    Node(size_t id, double &priority) : id(id), priority(&priority) {}
+    bool operator<(const Node &rhs) const { return *priority < *rhs.priority; }
+  };
+
   std::vector<double> priorities_;
   std::priority_queue<Node> queue_;
 };

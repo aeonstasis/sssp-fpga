@@ -24,5 +24,6 @@ install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 ## Generate test executable
 enable_testing()
 add_executable(graph_test test/graph_test.cpp)
+target_link_libraries(graph_test graph)
 target_link_libraries(graph_test gtest gtest_main)
 add_test(GRAPH_TEST graph_test)
