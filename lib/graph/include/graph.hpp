@@ -25,6 +25,9 @@ public:
   Graph(size_t num_vertices);
   void addEdge(size_t src, size_t dest, size_t cost);
   std::vector<size_t> getNeighbors(size_t src) const;
+  inline std::vector<Edge> getEdges(size_t src) const {
+    return adjacency_list.at(src);
+  }
   size_t cost(size_t src, size_t dest) const;
   std::string toString() const;
 
