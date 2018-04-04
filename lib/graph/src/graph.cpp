@@ -35,7 +35,7 @@ const std::vector<Edge> &Graph::getEdges(size_t src) const {
   return adjacency_list.at(src);
 }
 
-const std::vector<Edge> &Graph::getAllEdges() {
+const std::vector<Edge> &Graph::getAllEdges() const {
   if (all_edges.size()) return all_edges;
 
   for (size_t vertex = 0; vertex < num_vertices; vertex++) {
