@@ -1,12 +1,27 @@
-#include "bellmanford.hpp"
+#include "bellman_ford.hpp"
 #include "docopt.h"
 #include "graph.hpp"
 #include <iostream>
-#include <thread>
+#include <map>
+
+static const char USAGE[] =
+    R"(Run sequential or multithreaded single-source shortest paths using Bellman-Ford.
+    )";
 
 using graph::Graph;
 
+void printArgs(const std::map<std::string, docopt::value> &args) {
+  std::cout << "{" << std::endl;
+  for (const auto &arg : args) {
+    std::cout << "  " << arg.first << ": " << arg.second << std::endl;
+  }
+  std::cout << "}" << std::endl;
+}
+
 int main(int argc, const char *argv[]) {
+  auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
+  printArgs(args);
+
   // const Graph graph = Graph::generateGraph(10, 20, 12345);
   Graph graph(4);
   graph.addEdge(0, 1, 10);
@@ -20,9 +35,5 @@ int main(int argc, const char *argv[]) {
   for (size_t i = 0; i < bell_dist.size(); i++) {
     std::cout << source << " -> " << i << ": " << bell_dist.at(i) << std::endl;
   }
-
-  auto thread =
-      std::thread{[graph]() { std::cout << graph.toString() << std::endl; }};
-  thread.join();
   return 0;
 }

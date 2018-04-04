@@ -59,10 +59,6 @@ void Graph::addEdge(size_t src, size_t dest, double cost) {
   all_edges.push_back({dest, src, cost});
 }
 
-const std::vector<Edge> &Graph::getEdges(size_t src) const {
-  return adjacency_list.at(src);
-}
-
 vector<size_t> Graph::getNeighbors(size_t src) const {
   checkBounds({src}, num_vertices);
   auto neighbors = vector<size_t>{};
