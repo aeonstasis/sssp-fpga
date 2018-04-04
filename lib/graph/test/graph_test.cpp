@@ -49,11 +49,11 @@ TEST(GraphTest, SaveAndLoad) {
   graph.addEdge(1, 2, 4);
 
   // TODO: properly use tmpfile() later
-  auto filename = "/tmp/gtest_graph_test.txt";
+  auto filename = "/tmp/gtest_graph_test.bin";
   auto new_graph = Graph{0};
   try {
-    graph.save(filename);
-    new_graph.load(filename);
+    graph.saveBinary(filename);
+    new_graph.loadBinary(filename);
   } catch (const std::exception &e) {
     std::remove(filename);
     FAIL() << "IO error encountered";
@@ -66,5 +66,5 @@ TEST(GraphTest, SaveAndLoad) {
   auto expected = std::vector<size_t>{{1, 2}};
   EXPECT_EQ(new_graph.getNeighbors(0), expected);
 
-  std::remove(filename);
+  // std::remove(filename);
 }

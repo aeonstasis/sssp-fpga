@@ -1,19 +1,24 @@
 #include "graph.hpp"
 
-#include <stdio.h>
 #include <algorithm>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <random>
+#include <sstream>
 #include <stdexcept>
+#include <stdio.h>
 
 using std::string;
 using std::vector;
 
 namespace graph {
+
+constexpr double kEdgeWeightMin = -100.0;
+constexpr double kEdgeWeightMax = 100.0;
 
 void checkBounds(const vector<size_t> &input, size_t max) {
   if (std::any_of(input.begin(), input.end(),
@@ -23,26 +28,39 @@ void checkBounds(const vector<size_t> &input, size_t max) {
 }
 
 Graph::Graph(size_t num_vertices)
-    : num_vertices(num_vertices), adjacency_list(num_vertices), all_edges(0) {}
+    : num_vertices(num_vertices), adjacency_list(num_vertices), all_edges() {}
 
-void Graph::addEdge(size_t src, size_t dest, size_t cost) {
+Graph::Graph(const std::string &filename)
+    : num_vertices(), adjacency_list(), all_edges() {
+  auto file = std::ifstream{filename};
+  auto line = std::string{};
+
+  // Read number of vertices
+  std::getline(file, line);
+  num_vertices = static_cast<size_t>(std::stoi(line));
+  adjacency_list.resize(num_vertices);
+
+  // Read in each edge
+  size_t src;
+  size_t dest;
+  double cost;
+  for (; std::getline(file, line);) {
+    auto stream = std::stringstream{line};
+    stream >> src >> dest >> cost;
+    addEdge(src, dest, cost);
+  }
+}
+
+void Graph::addEdge(size_t src, size_t dest, double cost) {
   checkBounds({src, dest}, num_vertices);
   adjacency_list[src].push_back({src, dest, cost});
   adjacency_list[dest].push_back({dest, src, cost});
+  all_edges.push_back({src, dest, cost});
+  all_edges.push_back({dest, src, cost});
 }
 
 const std::vector<Edge> &Graph::getEdges(size_t src) const {
   return adjacency_list.at(src);
-}
-
-const std::vector<Edge> &Graph::getAllEdges() const {
-  if (all_edges.size()) return all_edges;
-
-  for (size_t vertex = 0; vertex < num_vertices; vertex++) {
-    vector<Edge> edges = getEdges(vertex);
-    all_edges.insert(std::end(all_edges), std::begin(edges), std::end(edges));
-  }
-  return all_edges;
 }
 
 vector<size_t> Graph::getNeighbors(size_t src) const {
@@ -56,7 +74,7 @@ vector<size_t> Graph::getNeighbors(size_t src) const {
   return neighbors;
 }
 
-size_t Graph::cost(size_t src, size_t dest) const {
+double Graph::cost(size_t src, size_t dest) const {
   checkBounds({src, dest}, num_vertices);
   const auto &vertex_list = adjacency_list.at(src);
   auto edge =
@@ -81,42 +99,41 @@ string Graph::toString() const {
   return str;
 }
 
-void Graph::save(const std::string &output_path) const {
+void Graph::saveBinary(const std::string &output_path) const {
   auto out_stream = std::ofstream{output_path};
-  boost::archive::text_oarchive oa{out_stream};
+  boost::archive::binary_oarchive oa{out_stream};
   oa << *this;
 }
 
-void Graph::load(const std::string &input_path) {
+void Graph::loadBinary(const std::string &input_path) {
   auto in_stream = std::ifstream{input_path};
-  boost::archive::text_iarchive ia{in_stream};
+  boost::archive::binary_iarchive ia{in_stream};
   ia >> *this;
 }
 
-Graph Graph::generateGraph(size_t num_vertices, size_t num_edges, int seed) {
-  std::srand(seed);
+Graph Graph::generateGraph(size_t num_vertices, size_t num_edges) {
+  std::random_device seed;
+  auto engine = std::default_random_engine{seed()};
+  auto weight_dist =
+      std::uniform_real_distribution<double>{kEdgeWeightMin, kEdgeWeightMax};
+  auto vertex_dist = std::uniform_int_distribution<size_t>{0, num_vertices - 1};
+
   auto graph = Graph{num_vertices};
-
   if (num_edges < num_vertices - 1) {
-    std::cerr << "Graph generation failed: number of vertices (" << num_vertices
-              << ") was less than or equal to number of edges" << num_edges
-              << "." << std::endl;
-    return graph;
+    auto buffer = std::stringstream{};
+    buffer << "Graph generation failed: number of vertices (" << num_vertices
+           << ") was less than or equal to number of edges" << num_edges << "."
+           << std::endl;
+    throw std::invalid_argument(buffer.str());
   }
 
-  for (size_t i = 1; i < num_vertices; i++) {
-    size_t src = std::rand() % i;
-    size_t cost = 1 + (std::rand() % kMaxCost);
-    graph.addEdge(src, i, cost);
-  }
-
-  for (size_t i = num_vertices - 1; i < num_edges; i++) {
-    size_t src, dest;
+  size_t src, dest;
+  for (size_t i = 0; i < num_edges; i++) {
     do {
-      src = std::rand() % num_vertices;
-      dest = std::rand() % num_vertices;
+      src = vertex_dist(engine);
+      dest = vertex_dist(engine);
     } while (src == dest);
-    size_t cost = 1 + (std::rand() % kMaxCost);
+    double cost = weight_dist(engine);
     graph.addEdge(src, dest, cost);
   }
 
