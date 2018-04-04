@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 project(SSSP)
-include(ExternalProject)
 
 # Load CMAKE configuration from environment variables
 set(CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
@@ -13,26 +12,11 @@ if (NOT CMAKE_BUILD_TYPE)
        FORCE)
 endif()
 
-# Third-party Dependencies
-# Docopt
-ExternalProject_Add(
-  docopt
-  PREFIX "${PROJECT_SOURCE_DIR}/third-party"
-	GIT_REPOSITORY git@github.com:docopt/docopt.cpp.git
-  BUILD_COMMAND make docopt_s
-  INSTALL_COMMAND ""
-	LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON)
-ExternalProject_Get_Property(docopt binary_dir)
-ExternalProject_Get_Property(docopt source_dir)
-include_directories(${source_dir})
-add_library(libdocopt STATIC IMPORTED GLOBAL)
-add_dependencies(libdocopt docopt)
-set_target_properties(libdocopt PROPERTIES
-  IMPORTED_LOCATION ${binary_dir}/libdocopt.a
-)
+# Third-party dependencies
+file(GLOB cmakes ${PROJECT_SOURCE_DIR}/cmake/*.cmake)
+foreach(cmake ${cmakes})
+  include(${cmake})
+endforeach(cmake)
 
 # Boost
 find_package(Boost 1.58.0 REQUIRED COMPONENTS serialization)

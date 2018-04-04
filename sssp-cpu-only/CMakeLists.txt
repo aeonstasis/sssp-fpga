@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 project(SSSP_CPU_ONLY LANGUAGES CXX)
 
 ## C++ compiler options
@@ -12,7 +12,7 @@ find_package(Threads REQUIRED)
 
 ## Sources and headers
 include_directories(include)
-file(GLOB SOURCES src/*.cpp)
+set(SOURCES src/main.cpp src/dijkstra.cpp)
 set(MAIN_EXE_NAME sssp_cpu_only)
 
 ## Generate executable
