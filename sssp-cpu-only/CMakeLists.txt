@@ -12,7 +12,7 @@ find_package(Threads REQUIRED)
 
 ## Sources and headers
 include_directories(include)
-set(SOURCES src/main.cpp src/dijkstra.cpp)
+set(SOURCES src/main.cpp src/bellmanford.cpp)
 set(MAIN_EXE_NAME sssp_cpu_only)
 
 ## Generate executable
