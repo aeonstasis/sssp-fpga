@@ -1,5 +1,6 @@
 #include "graph.hpp"
 
+#include <stdio.h>
 #include <algorithm>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -8,7 +9,6 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <stdio.h>
 
 using std::string;
 using std::vector;
@@ -23,12 +23,26 @@ void checkBounds(const vector<size_t> &input, size_t max) {
 }
 
 Graph::Graph(size_t num_vertices)
-    : num_vertices(num_vertices), adjacency_list(num_vertices) {}
+    : num_vertices(num_vertices), adjacency_list(num_vertices), all_edges(0) {}
 
 void Graph::addEdge(size_t src, size_t dest, size_t cost) {
   checkBounds({src, dest}, num_vertices);
   adjacency_list[src].push_back({src, dest, cost});
   adjacency_list[dest].push_back({dest, src, cost});
+}
+
+const std::vector<Edge> &Graph::getEdges(size_t src) const {
+  return adjacency_list.at(src);
+}
+
+const std::vector<Edge> &Graph::getAllEdges() {
+  if (all_edges.size()) return all_edges;
+
+  for (size_t vertex = 0; vertex < num_vertices; vertex++) {
+    vector<Edge> edges = getEdges(vertex);
+    all_edges.insert(std::end(all_edges), std::begin(edges), std::end(edges));
+  }
+  return all_edges;
 }
 
 vector<size_t> Graph::getNeighbors(size_t src) const {

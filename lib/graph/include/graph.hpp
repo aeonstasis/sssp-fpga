@@ -21,9 +21,12 @@ class Graph {
 public:
   size_t num_vertices;
   std::vector<std::vector<Edge>> adjacency_list;
+  std::vector<Edge> all_edges;
 
   Graph(size_t num_vertices);
   void addEdge(size_t src, size_t dest, size_t cost);
+  const std::vector<Edge>& getEdges(size_t src) const;
+  const std::vector<Edge>& getAllEdges();
   std::vector<size_t> getNeighbors(size_t src) const;
   size_t cost(size_t src, size_t dest) const;
   std::string toString() const;
