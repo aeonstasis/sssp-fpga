@@ -22,6 +22,7 @@ class Graph {
 
   Graph(size_t num_vertices);
   void addEdge(size_t src, size_t dest, int cost);
+  std::vector<int> getNeighbors(size_t src);
   std::string toString() const;
 
   static Graph generateGraph(size_t num_vertices, size_t num_edges, int seed);
