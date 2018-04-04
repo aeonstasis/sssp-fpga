@@ -13,6 +13,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Third-party dependencies
+include(CTest)
 file(GLOB cmakes ${PROJECT_SOURCE_DIR}/cmake/*.cmake)
 foreach(cmake ${cmakes})
   include(${cmake})

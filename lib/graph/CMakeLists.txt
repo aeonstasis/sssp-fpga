@@ -12,7 +12,7 @@ set(LIB_NAME graph)
 include_directories(include)
 file(GLOB SOURCES src/*.cpp)
 
-## Generate executable
+## Generate library
 add_library(${LIB_NAME} SHARED ${SOURCES})
 target_include_directories(${LIB_NAME} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -20,3 +20,9 @@ target_include_directories(${LIB_NAME} INTERFACE
 )
 target_link_libraries(${LIB_NAME} Boost::serialization)
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
+
+## Generate test executable
+enable_testing()
+add_executable(graph_test test/graph_test.cpp)
+target_link_libraries(graph_test gtest gtest_main)
+add_test(GRAPH_TEST graph_test)
