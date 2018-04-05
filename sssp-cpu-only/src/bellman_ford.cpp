@@ -53,7 +53,7 @@ void bellmanFordWorker(const graph::Graph &graph, vector<double> &distances,
     for (size_t edge_id = range.start; edge_id < range.end; edge_id++) {
       // Relax this edge, ensuring mutual exclusion around access to distances
       const auto &edge = all_edges.at(edge_id);
-      std::lock_guard<std::mutex> guard{lock};
+      std::lock_guard<std::mutex> guard{lock};  // lock released at end of scope
       if (distances.at(edge.src) + edge.cost < distances.at(edge.dest)) {
         distances[edge.dest] = distances.at(edge.src) + edge.cost;
       }
