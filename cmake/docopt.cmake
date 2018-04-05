@@ -1,6 +1,6 @@
 include(ExternalProject)
 ExternalProject_Add(docopt
-	GIT_REPOSITORY git@github.com:docopt/docopt.cpp.git
+	GIT_REPOSITORY https://github.com/docopt/docopt.cpp.git
   BUILD_COMMAND make docopt_s
 	INSTALL_COMMAND "")
 ExternalProject_Get_Property(docopt binary_dir)
