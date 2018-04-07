@@ -1,12 +1,24 @@
 #include "bellman_ford.hpp"
 #include "docopt.h"
 #include "graph.hpp"
+#include <chrono>
 #include <iostream>
 #include <map>
 
 static const char USAGE[] =
-    R"(Run sequential or multithreaded single-source shortest paths using Bellman-Ford.
-    )";
+    R"(Concurrency Final Project.
+
+  Run sequential or multithreaded single-source shortest paths using Bellman-Ford.
+
+  Usage:
+    sssp_cpu_only --input=<input> --source=<source> [--workers=<workers>]
+
+  Options:
+    -h --help           Show this screen.
+    --input=<input>     String-valued path to an input graph text file.
+    --source=<source>   Integer-valued source id, must be less than number of vertices. [default: 0]
+    --workers=<workers> Integer-valued number of threads.
+)";
 
 using graph::Graph;
 
@@ -18,22 +30,33 @@ void printArgs(const std::map<std::string, docopt::value> &args) {
   std::cout << "}" << std::endl;
 }
 
+void printOutput(const std::vector<double> &paths,
+                 const std::chrono::duration<double> &duration) {
+  std::cout
+      << "Elapsed runtime: "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()
+      << "ms" << std::endl;
+
+  std::cout << "Shortest paths to each vertex: " << std::endl;
+  for (size_t i = 0; i < paths.size(); i++) {
+    std::cout << "  " << i << ": " << paths.at(i) << std::endl;
+  }
+}
+
 int main(int argc, const char *argv[]) {
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
+  auto num_workers = args.at("--workers");
   printArgs(args);
 
-  // const Graph graph = Graph::generateGraph(10, 20, 12345);
-  Graph graph(4);
-  graph.addEdge(0, 1, 10);
-  graph.addEdge(1, 2, 10);
-  graph.addEdge(2, 3, 10);
-  graph.addEdge(0, 2, 1);
-  graph.addEdge(1, 3, 1);
+  auto graph = Graph{args.at("--input").asString()};
+  auto source = args.at("--source").asLong();
 
-  size_t source = 0;
-  auto bell_dist = sssp::bellmanFord(graph, source);
-  for (size_t i = 0; i < bell_dist.size(); i++) {
-    std::cout << source << " -> " << i << ": " << bell_dist.at(i) << std::endl;
-  }
+  auto start = std::chrono::high_resolution_clock::now();
+  auto paths = (!num_workers) ? sssp::bellmanFord(graph, source)
+                              : sssp::bellmanFordParallel(graph, source,
+                                                          num_workers.asLong());
+  auto elapsed = std::chrono::high_resolution_clock::now() - start;
+  printOutput(paths, elapsed);
+
   return 0;
 }

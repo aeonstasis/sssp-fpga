@@ -53,7 +53,7 @@ void bellmanFordWorker(const graph::Graph &graph, vector<double> &distances,
     for (size_t edge_id = range.start; edge_id < range.end; edge_id++) {
       // Relax this edge, ensuring mutual exclusion around access to distances
       const auto &edge = all_edges.at(edge_id);
-      std::lock_guard<std::mutex> guard{lock};  // lock released at end of scope
+      std::lock_guard<std::mutex> guard{lock}; // lock released at end of scope
       if (distances.at(edge.src) + edge.cost < distances.at(edge.dest)) {
         distances[edge.dest] = distances.at(edge.src) + edge.cost;
       }
@@ -64,6 +64,10 @@ void bellmanFordWorker(const graph::Graph &graph, vector<double> &distances,
 
 vector<double> bellmanFordParallel(const graph::Graph &graph, size_t source,
                                    size_t num_threads) {
+  if (source > graph.num_vertices) {
+    throw std::invalid_argument("Source id cannot exceed num_vertices");
+  }
+
   auto partition = util::partition(graph.getNumEdges(), num_threads);
   auto threads = vector<std::thread>{};
   util::Barrier barrier{num_threads};
