@@ -10,16 +10,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 ## Sources and headers
 set(LIB_NAME graph)
 include_directories(include)
-file(GLOB SOURCES src/*.cpp)
 
 ## Generate library
-add_library(${LIB_NAME} SHARED ${SOURCES})
+add_library(${LIB_NAME} SHARED src/graph.cpp)
 target_include_directories(${LIB_NAME} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(${LIB_NAME} Boost::serialization)
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
+
+## Generate graph utility executable
+add_executable(graph_gen src/main.cpp)
+target_link_libraries(graph_gen graph)
+target_link_libraries(graph_gen libdocopt)
 
 ## Generate test executable
 enable_testing()
