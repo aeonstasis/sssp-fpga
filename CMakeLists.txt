@@ -25,3 +25,4 @@ find_package(Boost 1.54.0 REQUIRED COMPONENTS serialization)
 # Subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/graph lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cpu-only bin)
+add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-opencl xcl)
