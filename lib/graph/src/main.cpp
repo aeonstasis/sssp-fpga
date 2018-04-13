@@ -23,6 +23,6 @@ int main(int argc, const char *argv[]) {
   auto graph = Graph::generateGraph(
       args.at("--vertices").asLong(),
       args.at("--edges").asLong());
-  graph.saveBinary(args.at("--output").asString());
+  graph.saveToFile(args.at("--output").asString());
   std::cout << "Graph written successfully." << std::endl;
 }

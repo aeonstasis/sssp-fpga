@@ -33,6 +33,7 @@ public:
   // src_id dest_id cost\n
   Graph(const std::string &filename);
   void addEdge(size_t src, size_t dest, double cost);
+  void addSingleEdge(size_t src, size_t dest, double cost);
   inline const std::vector<Edge> &getEdges(size_t src) const {
     return adjacency_list.at(src);
   }
@@ -42,9 +43,8 @@ public:
   double cost(size_t src, size_t dest) const;
   std::string toString() const;
 
-  // Serialize a Graph instance to or from a file using a Boost binary archive
-  void saveBinary(const std::string &output_path) const;
-  void loadBinary(const std::string &input_path);
+  // Write the graph instance to a file
+  void saveToFile(const std::string &output_path) const;
 
   // Create a graph instance with the given number of vertices and edges.
   // Each edge has random unique endpoint vertices and random weight in [-100.0,

@@ -1,9 +1,6 @@
 #include "graph.hpp"
 
 #include <algorithm>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -11,6 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <stdio.h>
+#include <string>
 
 using std::string;
 using std::vector;
@@ -47,7 +45,7 @@ Graph::Graph(const std::string &filename)
   for (; std::getline(file, line);) {
     auto stream = std::stringstream{line};
     stream >> src >> dest >> cost;
-    addEdge(src, dest, cost);
+    addSingleEdge(src, dest, cost);
   }
 }
 
@@ -57,6 +55,12 @@ void Graph::addEdge(size_t src, size_t dest, double cost) {
   adjacency_list[dest].push_back({dest, src, cost});
   all_edges.push_back({src, dest, cost});
   all_edges.push_back({dest, src, cost});
+}
+
+void Graph::addSingleEdge(size_t src, size_t dest, double cost) {
+  checkBounds({src, dest}, num_vertices);
+  adjacency_list[src].push_back({src, dest, cost});
+  all_edges.push_back({src, dest, cost});
 }
 
 vector<size_t> Graph::getNeighbors(size_t src) const {
@@ -95,16 +99,20 @@ string Graph::toString() const {
   return str;
 }
 
-void Graph::saveBinary(const std::string &output_path) const {
+void Graph::saveToFile(const std::string &output_path) const {
   auto out_stream = std::ofstream{output_path};
-  boost::archive::binary_oarchive oa{out_stream};
-  oa << *this;
+  out_stream << toString();
 }
 
-void Graph::loadBinary(const std::string &input_path) {
-  auto in_stream = std::ifstream{input_path};
-  boost::archive::binary_iarchive ia{in_stream};
-  ia >> *this;
+std::vector<string> split(string str, char sep) {
+  std::istringstream ss(str);
+  std::vector<string> tokens;
+  while(ss) {
+    string s;
+    if(!std::getline(ss, s, sep)) break;
+    tokens.push_back(s);
+  }
+  return tokens;
 }
 
 Graph Graph::generateGraph(size_t num_vertices, size_t num_edges) {
@@ -137,17 +145,3 @@ Graph Graph::generateGraph(size_t num_vertices, size_t num_edges) {
 }
 
 } /* namespace graph */
-
-namespace boost {
-namespace serialization {
-template <class Archive>
-void serialize(Archive &ar, graph::Edge &edge, const unsigned int) {
-  ar &edge.src &edge.dest &edge.cost;
-}
-
-template <class Archive>
-void serialize(Archive &ar, graph::Graph &graph, const unsigned int) {
-  ar &graph.num_vertices &graph.adjacency_list;
-}
-} /* namespace serialization */
-} /* namespace boost */
