@@ -1,0 +1,13 @@
+version,device,dataset,time
+cpu,f1,data1,100
+fpga,f1,data1,50
+cuda,f1,data1,75
+cpu,f1,data2,300
+fpga,f1,data2,200
+cuda,f1,data2,250
+cpu,eldar,data1,200
+fpga,eldar,data1,100
+cuda,eldar,data1,150
+cpu,eldar,data2,250
+fpga,eldar,data2,150
+cuda,eldar,data2,180
