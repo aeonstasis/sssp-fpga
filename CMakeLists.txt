@@ -22,5 +22,5 @@ endforeach(cmake)
 # Subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/graph graph)
 add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cpu-only cpu)
-add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cuda cuda)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-opencl xcl)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cuda cuda)
+add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-opencl xcl)

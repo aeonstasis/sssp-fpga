@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(GRAPH LANGUAGES CXX)
 
 ## C++ compiler options
@@ -20,14 +20,14 @@ target_include_directories(${LIB_NAME} INTERFACE
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 
 ## Generate graph utility executable
-add_executable(graph_gen src/main.cpp)
-target_link_libraries(graph_gen graph)
-target_link_libraries(graph_gen libdocopt)
-install(TARGETS graph_gen RUNTIME DESTINATION bin)
+# add_executable(graph_gen src/main.cpp)
+# target_link_libraries(graph_gen graph)
+# target_link_libraries(graph_gen libdocopt)
+# install(TARGETS graph_gen RUNTIME DESTINATION bin)
 
 ## Generate test executable
-enable_testing()
-add_executable(graph_test test/graph_test.cpp)
-target_link_libraries(graph_test graph)
-target_link_libraries(graph_test gtest gtest_main)
-add_test(GRAPH_TEST graph_test)
+# enable_testing()
+# add_executable(graph_test test/graph_test.cpp)
+# target_link_libraries(graph_test graph)
+# target_link_libraries(graph_test gtest gtest_main)
+# add_test(GRAPH_TEST graph_test)

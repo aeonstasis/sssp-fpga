@@ -15,6 +15,11 @@ cmake ..
 make
 ```
 
+### CUDA
+
+### SDAccel
+export XILINX_SDX
+
 ### Testing
 
 Run all tests using:
