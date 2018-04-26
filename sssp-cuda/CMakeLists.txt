@@ -21,7 +21,7 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp)
 # Program binaries and linker
 add_executable(kmeans ${SOURCES})
 set_property(TARGET kmeans PROPERTY CUDA_SEPARATE_COMPILATION ON)
-target_link_libraries(kmeans PUBLIC util cuda_kmeans libdocopt ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(kmeans PUBLIC util cuda_kmeans libdocopt graph ${CMAKE_THREAD_LIBS_INIT})
 install(TARGETS kmeans RUNTIME DESTINATION bin)
 
 # Run with the appropriate architecture >50 at the command line

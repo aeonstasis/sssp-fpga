@@ -10,6 +10,7 @@
 #include "docopt.h"
 #include "kmeans.h"
 #include "util.h"
+#include "graph.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cstring>
@@ -68,6 +69,8 @@ size_t MAX_ITERS = 0;
 double THRESHOLD = 0.0;
 pthread_barrier_t barrier;
 util::SyncType syncType = util::SyncType::NONE;
+
+graph::Edge edge = {0, 1, 2.0};
 
 // 80 bytes
 struct ThreadArg {

@@ -23,6 +23,7 @@ install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 add_executable(graph_gen src/main.cpp)
 target_link_libraries(graph_gen graph)
 target_link_libraries(graph_gen libdocopt)
+install(TARGETS graph_gen RUNTIME DESTINATION bin)
 
 ## Generate test executable
 enable_testing()

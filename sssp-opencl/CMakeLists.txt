@@ -20,4 +20,4 @@ link_directories(${OpenCL_LIBRARY})
 ## Generate executable
 add_executable(${MAIN_EXE_NAME} src/main.cpp)
 target_link_libraries(${MAIN_EXE_NAME} OpenCL::OpenCL)
-install(TARGETS ${MAIN_EXE_NAME} RUNTIME DESTINATION xcl)
+install(TARGETS ${MAIN_EXE_NAME} RUNTIME DESTINATION bin)
