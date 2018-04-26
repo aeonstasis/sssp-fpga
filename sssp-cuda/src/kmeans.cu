@@ -341,7 +341,7 @@ __global__ void normalize_centroids_extra(
     const double *__restrict__ points, size_t num_points, size_t dim,
     size_t points_pitch, double *__restrict__ old_centroids,
     double *__restrict__ centroids, size_t num_centroids,
-    size_t centroids_pitch, int *__restrict__counts, curandState_t *states) {
+    size_t centroids_pitch, int *__restrict__ counts, curandState_t *states) {
   // Calculate which centroid this thread represents
   const size_t index = threadIdx.x;
   auto centroid = address<double>(centroids, index, 0, centroids_pitch);

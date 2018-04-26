@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(SSSP_OPENCL LANGUAGES CXX)
 
 ## C++ compiler options
