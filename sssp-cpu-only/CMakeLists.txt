@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
 project(SSSP_CPU_ONLY LANGUAGES CXX)
 
 ## C++ compiler options
@@ -27,9 +27,9 @@ target_link_libraries(${MAIN_EXE_NAME} libdocopt)
 install(TARGETS ${MAIN_EXE_NAME} RUNTIME DESTINATION bin)
 
 ## Generate test executable
-enable_testing()
-include(GoogleTest)
-add_executable(bellmanford_test test/util_test.cpp test/bellman_ford_test.cpp)
-target_link_libraries(bellmanford_test bellmanford)
-target_link_libraries(bellmanford_test gtest gtest_main)
-add_test(BELLMANFORD_TEST bellmanford_test)
+## enable_testing()
+## include(GoogleTest)
+## add_executable(bellmanford_test test/util_test.cpp test/bellman_ford_test.cpp)
+## target_link_libraries(bellmanford_test bellmanford)
+## target_link_libraries(bellmanford_test gtest gtest_main)
+## add_test(BELLMANFORD_TEST bellmanford_test)
