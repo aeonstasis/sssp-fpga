@@ -15,7 +15,7 @@ using std::vector;
 
 namespace graph {
 
-constexpr double kEdgeWeightMin = -100.0;
+constexpr double kEdgeWeightMin = 0.0;
 constexpr double kEdgeWeightMax = 100.0;
 
 void checkBounds(const vector<size_t> &input, size_t max) {
