@@ -1,7 +1,7 @@
 library(ggplot2)
 library(reshape2)
 
-df <- read.csv("~/workspace/sssp-fpga/data/sample-timing.csv")
+df <- read.csv("~/workspace/sssp-fpga/data/timing.csv")
 
 # absolute timing graphs per dataset
 for(datasetName in levels(df$dataset)) {
@@ -12,5 +12,9 @@ for(datasetName in levels(df$dataset)) {
   ggplot(melted, aes(version, value)) + 
     geom_bar(aes(fill = device), position = 'dodge', stat = 'identity') +
     xlab('Algorithm version') +
-    ylab('Time to complete, ms')
+    ylab('Time to complete, ms') +
+    ggtitle(datasetName)
+  
+  
+  ggsave(paste(datasetName, '.png'), plot = last_plot(), width=10, height=5)
 }
