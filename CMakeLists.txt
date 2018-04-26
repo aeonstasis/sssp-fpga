@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
 project(SSSP)
 
 # Load CMAKE configuration from environment variables
@@ -22,4 +22,4 @@ endforeach(cmake)
 # Subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/graph lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-cpu-only bin)
-add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-opencl xcl)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/sssp-opencl xcl)
