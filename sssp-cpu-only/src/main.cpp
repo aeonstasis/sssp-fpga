@@ -45,8 +45,8 @@ void printOutput(const std::vector<double> &paths,
 
 int main(int argc, const char *argv[]) {
   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
-  auto num_workers = args.at("--workers").asLong();
-  if (num_workers <= 0) {
+  auto num_workers = args.at("--workers");
+  if (num_workers && num_workers.asLong() <= 0) {
     throw std::invalid_argument("Must specify at least one worker!");
   }
   printArgs(args);
@@ -57,7 +57,7 @@ int main(int argc, const char *argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   auto paths = (!num_workers)
                    ? sssp::bellmanFord(graph, source)
-                   : sssp::bellmanFordParallel(graph, source, num_workers);
+                   : sssp::bellmanFordParallel(graph, source, num_workers.asLong());
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   printOutput(paths, elapsed);
 
