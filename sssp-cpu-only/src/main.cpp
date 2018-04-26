@@ -32,15 +32,15 @@ void printArgs(const std::map<std::string, docopt::value> &args) {
 
 void printOutput(const std::vector<double> &paths,
                  const std::chrono::duration<double> &duration) {
-  std::cout
-      << "Elapsed runtime: "
-      << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()
-      << "ms" << std::endl;
-
   std::cout << "Shortest paths to each vertex: " << std::endl;
   for (size_t i = 0; i < paths.size(); i++) {
     std::cout << "  " << i << ": " << paths.at(i) << std::endl;
   }
+
+  std::cout
+      << "Elapsed runtime: "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()
+      << "ms" << std::endl;
 }
 
 int main(int argc, const char *argv[]) {
