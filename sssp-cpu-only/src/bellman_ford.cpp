@@ -49,14 +49,22 @@ void bellmanFordWorker(const graph::Graph &graph, vector<double> &distances,
                        std::mutex &lock) {
   // Iteratively relax edges
   const auto &all_edges = graph.getAllEdges();
+  auto localDists = vector<double>(distances);
   for (size_t iter = 0; iter < graph.num_vertices; iter++) {
+    // relax edges
     for (size_t edge_id = range.start; edge_id < range.end; edge_id++) {
       // Relax this edge, ensuring mutual exclusion around access to distances
       const auto &edge = all_edges.at(edge_id);
-      std::lock_guard<std::mutex> guard{lock}; // lock released at end of scope
-      if (distances.at(edge.src) + edge.cost < distances.at(edge.dest)) {
-        distances[edge.dest] = distances.at(edge.src) + edge.cost;
+      // std::lock_guard<std::mutex> guard{lock}; // lock released at end of scope
+      if (localDists.at(edge.src) + edge.cost < localDists.at(edge.dest)) {
+        distances[edge.dest] = localDists.at(edge.src) + edge.cost;
       }
+    }
+    barrier.wait();
+    
+    // read and copy distances
+    for (size_t i = 0; i < graph.num_vertices; i++) {
+      localDists[i] = distances.at(i);
     }
     barrier.wait();
   }
