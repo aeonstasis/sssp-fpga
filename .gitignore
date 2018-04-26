@@ -2,6 +2,8 @@
 build
 bin
 third-party
+input
+data
 
 # Editor artifacts
 .clang_complete
