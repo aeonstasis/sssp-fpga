@@ -29,11 +29,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl2.hpp"
 #include "graph.hpp"
 #include <vector>
+#include <stdexcept>
+#include <string>
+#include <limits>
 
 using std::vector;
+using std::string;
 using graph::Graph;
+using graph::Edge;
 
-static const int DATA_SIZE = 256;
+static constexpr double kInfinity = std::numeric_limits<double>::max();
 static const std::string error_message =
     "Error: Result mismatch:\n"
     "i = %d CPU result = %d Device result = %d\n";
@@ -42,15 +47,39 @@ static const std::string error_message =
 // an addition on two vectors
 int main(int argc, char **argv) {
 
-    Graph graph = Graph::generateGraph(20, 30);
+    /*
+    if(argc != 3) {
+        throw std::invalid_argument("Usage: ./bellmanford <input-file> <source-id>");
+    }
+    string inputFile = argv[1];
+    string sourceStr = argv[2];
+    int source = std::stoi(sourceStr); 
+    */
+    string inputFile = "../data/v10-e20.graph";
+    int source = 0;
+
+
+    Graph graph = Graph(inputFile);
 
     // compute the size of array in bytes
-    size_t size_in_bytes = DATA_SIZE * sizeof(int);
+    // size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
-    vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 10);
-    vector<int,aligned_allocator<int>> source_b(DATA_SIZE, 32);
-    vector<int,aligned_allocator<int>> source_results(DATA_SIZE);
+    vector<double, aligned_allocator<double>> distsRead(graph.num_vertices, kInfinity);
+    vector<double, aligned_allocator<double>> distsWrite(graph.num_vertices, kInfinity);
+    distsRead[source] = 0.0;
+    distsWrite[source] = 0.0;
+    vector<int, aligned_allocator<int>> sources(graph.getNumEdges());
+    vector<int, aligned_allocator<int>> destinations(graph.getNumEdges());
+    vector<double, aligned_allocator<double>> costs(graph.getNumEdges());
+
+    vector<Edge> allEdges = graph.getAllEdges();
+    for(int i=0; i<allEdges.size(); i++) {
+        sources[i] = allEdges[i].src;
+        destinations[i] = allEdges[i].dest;
+        costs[i] = allEdges[i].cost;
+    }
+    
 
 
     // The get_xil_devices will return vector of Xilinx Devices 
@@ -76,39 +105,52 @@ int main(int argc, char **argv) {
     // be used to reference the memory locations on the device. The cl::Buffer
     // object cannot be referenced directly and must be passed to other OpenCL
     // functions.
-    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            size_in_bytes, source_a.data());
-    cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            size_in_bytes, source_b.data());
-    cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            size_in_bytes, source_results.data());
+    cl::Buffer bufferDistsRead(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,  
+            graph.num_vertices * sizeof(double), distsRead.data());
+    cl::Buffer bufferDistsWrite(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,  
+            graph.num_vertices * sizeof(double), distsWrite.data());
+    cl::Buffer bufferSources(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            graph.getNumEdges() * sizeof(int), sources.data());
+    cl::Buffer bufferDestinations(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            graph.getNumEdges() * sizeof(int), destinations.data());
+    cl::Buffer bufferCosts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            graph.getNumEdges() * sizeof(double), costs.data());
+
     //Separate Read/write Buffer vector is needed to migrate data between host/device
     std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_a);
-    inBufVec.push_back(buffer_b);
-    outBufVec.push_back(buffer_result);
+    inBufVec.push_back(bufferDistsRead);
+    inBufVec.push_back(bufferDistsWrite);
+    inBufVec.push_back(bufferSources);
+    inBufVec.push_back(bufferDestinations);
+    inBufVec.push_back(bufferCosts);
+    outBufVec.push_back(bufferDistsRead);
 
 
     // These commands will load the source_a and source_b vectors from the host
     // application and into the buffer_a and buffer_b cl::Buffer objects. The data
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    q.enqueueMigrateMemObjects(inBufVec,0/* TN: 0 means from host*/);
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
     // FPGA. This function is defined in the src/vetor_addition.cl file.
-    cl::Kernel krnl_vector_add(program,"vector_add");
+    cl::Kernel krnl_bellman_ford(program,"bellman_ford");
 
     //set the kernel Arguments
     int narg=0;
-    krnl_vector_add.setArg(narg++,buffer_result);
-    krnl_vector_add.setArg(narg++,buffer_a);
-    krnl_vector_add.setArg(narg++,buffer_b);
-    krnl_vector_add.setArg(narg++,DATA_SIZE);
+    krnl_bellman_ford.setArg(narg++, graph.num_vertices);
+    krnl_bellman_ford.setArg(narg++, graph.getNumEdges());
+    krnl_bellman_ford.setArg(narg++, bufferDistsRead);
+    krnl_bellman_ford.setArg(narg++, bufferDistsWrite);
+    krnl_bellman_ford.setArg(narg++, bufferSources);
+    krnl_bellman_ford.setArg(narg++, bufferDestinations);
+    krnl_bellman_ford.setArg(narg++, bufferCosts);
+
+    std::cout << "Max work group size: " << krnl_bellman_ford.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(device) << std::endl;
 
     //Launch the Kernel
-    q.enqueueTask(krnl_vector_add);
+    q.enqueueTask(krnl_bellman_ford);
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
@@ -117,20 +159,9 @@ int main(int argc, char **argv) {
     q.finish();
 
 
-    int match = 0;
-    printf("Result = \n");
-    for (int i = 0; i < DATA_SIZE; i++) {
-        int host_result = source_a[i] + source_b[i];
-        if (source_results[i] != host_result) {
-            printf(error_message.c_str(), i, host_result, source_results[i]);
-            match = 1;
-            break;
-        } else {
-          printf("%d ", source_results[i]);
-          if (((i + 1) % 16) == 0) printf("\n");
-        }
+    for (int i = 0; i < graph.num_vertices; i++) {
+        printf("%d: %f\n", i, distsRead[i]);
     }
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    return 0;
 }

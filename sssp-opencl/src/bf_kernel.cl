@@ -27,26 +27,58 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics: enable
+
+ulong atom_cmpxchg(volatile __global ulong *p, ulong cmp, ulong val);
+
+double __attribute__((overloadable)) atomic_min(__global double *valq, double newVal) {
+    union {
+        double f;
+        unsigned long i;
+    } old;
+
+    union {
+        double f;
+        unsigned long i;
+    } new1;
+
+    do {
+        old.f = *valq;
+        new1.f = newVal < old.f ? newVal : old.f;
+    } while (atom_cmpxchg((volatile __global unsigned long*) valq, old.i, new1.i) != old.i);
+    return old.f;
+}
+
 // This function represents an OpenCL kernel. The kernel will be call from
 // host application using the xcl_run_kernels call. The pointers in kernel
 // parameters with the global keyword represents cl_mem objects on the FPGA
 // DDR memory.
 //
-#define BUFFER_SIZE 256
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void vector_add(global int* c,
-                global const int* a,
-                global const int* b,
-                       const int n_elements)
+void bellman_ford(const ulong numVertices,
+                const ulong numEdges,
+                global double* distsRead,
+                global double* distsWrite,
+                global const int* sources,
+                global const int* destinations,
+                global const double* costs)
 {
-    int arrayA[BUFFER_SIZE];
-    int arrayB[BUFFER_SIZE];
-    for (int i = 0 ; i < n_elements ; i += BUFFER_SIZE)
-    {
-        int size = BUFFER_SIZE;
-        if (i + size > n_elements) size = n_elements - i;
-        for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
-        for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
-        for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
+    for(int iter = 0; iter < numVertices; iter++) {
+        __attribute__((opencl_unroll_hint))
+        for(int i=0; i<numEdges; i++) {
+            int source = sources[i];
+            int dest = destinations[i];
+            double cost = costs[i];
+
+            if(distsRead[source] + cost < distsRead[dest]) {
+                distsWrite[dest] = distsRead[source] + cost;
+            }
+        }
+
+        __attribute__((opencl_unroll_hint))
+        for(int i=0; i<numEdges; i++) {
+            distsRead[i] = distsWrite[i];
+        }
     }
 }
