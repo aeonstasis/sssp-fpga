@@ -45,8 +45,8 @@ void vector_add(global int* c,
     {
         int size = BUFFER_SIZE;
         if (i + size > n_elements) size = n_elements - i;
-        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
-        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
-        vadd_writeC: for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
+        for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
+        for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
+        for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
     }
 }

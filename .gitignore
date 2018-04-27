@@ -51,3 +51,16 @@ CTestTestfile.cmake
 *.exe
 *.out
 *.app
+
+# opencl stuff
+sssp-opencl/.Xil/
+sssp-opencl/_xocc_compile_bf_kernel_bf_kernel.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.dir/
+sssp-opencl/_xocc_compile_vector_addition_vector_addition.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.dir/
+sssp-opencl/_xocc_link_bf_kernel.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0_bf_kernel.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.dir/
+sssp-opencl/_xocc_link_vector_addition.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0_vector_addition.sw_emu.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.dir/
+sssp-opencl/bellmanford
+sssp-opencl/emconfig.json
+sssp-opencl/helloworld
+sssp-opencl/sdaccel_profile_summary.csv
+sssp-opencl/sdaccel_profile_summary.html
+sssp-opencl/xclbin/

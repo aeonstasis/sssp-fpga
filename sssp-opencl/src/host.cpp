@@ -27,9 +27,11 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 #include "xcl2.hpp"
+#include "graph.hpp"
 #include <vector>
 
 using std::vector;
+using graph::Graph;
 
 static const int DATA_SIZE = 256;
 static const std::string error_message =
@@ -39,6 +41,9 @@ static const std::string error_message =
 // This example illustrates the very simple OpenCL example that performs
 // an addition on two vectors
 int main(int argc, char **argv) {
+
+    Graph graph = Graph::generateGraph(20, 30);
+
     // compute the size of array in bytes
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
@@ -62,7 +67,7 @@ int main(int argc, char **argv) {
     // xocc compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
+    std::string binaryFile = xcl::find_binary_file(device_name,"bf_kernel");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
