@@ -69,12 +69,12 @@ int main(int argc, char **argv) {
     vector<double, aligned_allocator<double>> distsWrite(graph.num_vertices, kInfinity);
     distsRead[source] = 0.0;
     distsWrite[source] = 0.0;
-    vector<int, aligned_allocator<int>> sources(graph.getNumEdges());
-    vector<int, aligned_allocator<int>> destinations(graph.getNumEdges());
+    vector<size_t, aligned_allocator<size_t>> sources(graph.getNumEdges());
+    vector<size_t, aligned_allocator<size_t>> destinations(graph.getNumEdges());
     vector<double, aligned_allocator<double>> costs(graph.getNumEdges());
 
     vector<Edge> allEdges = graph.getAllEdges();
-    for(int i=0; i<allEdges.size(); i++) {
+    for(size_t i=0; i<allEdges.size(); i++) {
         sources[i] = allEdges[i].src;
         destinations[i] = allEdges[i].dest;
         costs[i] = allEdges[i].cost;
@@ -110,9 +110,9 @@ int main(int argc, char **argv) {
     cl::Buffer bufferDistsWrite(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,  
             graph.num_vertices * sizeof(double), distsWrite.data());
     cl::Buffer bufferSources(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            graph.getNumEdges() * sizeof(int), sources.data());
+            graph.getNumEdges() * sizeof(size_t), sources.data());
     cl::Buffer bufferDestinations(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            graph.getNumEdges() * sizeof(int), destinations.data());
+            graph.getNumEdges() * sizeof(size_t), destinations.data());
     cl::Buffer bufferCosts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
             graph.getNumEdges() * sizeof(double), costs.data());
 
@@ -139,13 +139,13 @@ int main(int argc, char **argv) {
 
     //set the kernel Arguments
     int narg=0;
-    krnl_bellman_ford.setArg(narg++, graph.num_vertices);
-    krnl_bellman_ford.setArg(narg++, graph.getNumEdges());
     krnl_bellman_ford.setArg(narg++, bufferDistsRead);
     krnl_bellman_ford.setArg(narg++, bufferDistsWrite);
     krnl_bellman_ford.setArg(narg++, bufferSources);
     krnl_bellman_ford.setArg(narg++, bufferDestinations);
     krnl_bellman_ford.setArg(narg++, bufferCosts);
+    krnl_bellman_ford.setArg(narg++, graph.num_vertices);
+    krnl_bellman_ford.setArg(narg++, graph.getNumEdges());
 
     std::cout << "Max work group size: " << krnl_bellman_ford.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(device) << std::endl;
 

@@ -32,22 +32,19 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ulong atom_cmpxchg(volatile __global ulong *p, ulong cmp, ulong val);
 
-double __attribute__((overloadable)) atomic_min(__global double *valq, double newVal) {
-    union {
-        double f;
-        unsigned long i;
-    } old;
+double __attribute__((overloadable)) atomic_min(global double *valq, double val) {
 
-    union {
-        double f;
-        unsigned long i;
-    } new1;
+    double oldVal;
+    double newVal; 
+
+    unsigned long* oldValPtr = (unsigned long*) &oldVal;
+    unsigned long* newValPtr = (unsigned long*) &newVal;
 
     do {
-        old.f = *valq;
-        new1.f = newVal < old.f ? newVal : old.f;
-    } while (atom_cmpxchg((volatile __global unsigned long*) valq, old.i, new1.i) != old.i);
-    return old.f;
+        oldVal = *valq;
+        newVal = val < oldVal ? val : oldVal;
+    } while (atom_cmpxchg((volatile global unsigned long*) valq, *oldValPtr, *newValPtr) != *oldValPtr);
+    return oldVal;
 }
 
 // This function represents an OpenCL kernel. The kernel will be call from
@@ -56,28 +53,29 @@ double __attribute__((overloadable)) atomic_min(__global double *valq, double ne
 // DDR memory.
 //
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void bellman_ford(const ulong numVertices,
-                const ulong numEdges,
-                global double* distsRead,
+void bellman_ford(global double* distsRead,
                 global double* distsWrite,
-                global const int* sources,
-                global const int* destinations,
-                global const double* costs)
+                global const ulong* sources,
+                global const ulong* destinations,
+                global const double* costs,
+                const ulong numVertices,
+                const ulong numEdges)
 {
-    for(int iter = 0; iter < numVertices; iter++) {
+    for(ulong iter = 0; iter < numVertices; iter++) {
         __attribute__((opencl_unroll_hint))
         for(int i=0; i<numEdges; i++) {
-            int source = sources[i];
-            int dest = destinations[i];
+            ulong source = sources[i];
+            ulong dest = destinations[i];
             double cost = costs[i];
 
             if(distsRead[source] + cost < distsRead[dest]) {
                 distsWrite[dest] = distsRead[source] + cost;
             }
+            // atomic_min(&distsWrite[dest], distsRead[source] + cost);
         }
 
         __attribute__((opencl_unroll_hint))
-        for(int i=0; i<numEdges; i++) {
+        for(ulong i=0; i<numVertices; i++) {
             distsRead[i] = distsWrite[i];
         }
     }
