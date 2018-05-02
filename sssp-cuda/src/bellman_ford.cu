@@ -155,6 +155,19 @@ __device__ __forceinline__ double atomicMax(double *address, double val) {
   return __longlong_as_double(ret);
 }
 
+// Helper to allow atomicMin to be invoked on a double
+// https://github.com/treecode/Bonsai/blob/master/runtime/profiling/derived_atomic_functions.h
+__device__ __forceinline__ double atomicMin(double *address, double val) {
+  unsigned long long ret = __double_as_longlong(*address);
+  while (val < __longlong_as_double(ret)) {
+    unsigned long long old = ret;
+    if ((ret = atomicCAS((unsigned long long *)address, old,
+                         __double_as_longlong(val))) == old)
+      break;
+  }
+  return __longlong_as_double(ret);
+}
+
 // Templated helper to index into a flat array
 template <typename T>
 __device__ __forceinline__ T *address(T *src, size_t row, size_t col,
@@ -190,9 +203,8 @@ __global__ void relax(const size_t num_edges, const double* distsRead,
 
   Edge edge = edges[index];
 
-  if(distsRead[edge.src] + edge.cost < distsRead[edge.dest]) {
-    distsWrite[edge.dest] = distsRead[edge.src] + edge.cost;
-  }
+  double val = distsRead[edge.src] + edge.cost;
+  atomicMin(&distsWrite[edge.dest], val);
 }
 
 __global__ void copyBack(const size_t num_points, double* distsRead,
