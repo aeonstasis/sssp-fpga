@@ -47,17 +47,13 @@ static const std::string error_message =
 // an addition on two vectors
 int main(int argc, char **argv) {
 
-    /*
-    if(argc != 3) {
-        throw std::invalid_argument("Usage: ./bellmanford <input-file> <source-id>");
-    }
-    string inputFile = argv[1];
-    string sourceStr = argv[2];
-    int source = std::stoi(sourceStr); 
-    */
-    string inputFile = "../data/v10-e20.graph";
+    string inputFile = "../data/v10k-e25k.graph";
     int source = 0;
-
+    if(argc == 3) {
+        string inputFile = argv[1];
+        string sourceStr = argv[2];
+        int source = std::stoi(sourceStr); 
+    }
 
     Graph graph = Graph(inputFile);
 
